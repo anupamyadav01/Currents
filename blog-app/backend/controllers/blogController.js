@@ -2,6 +2,9 @@ const verifyUser = require("../middlewares/auth.js");
 const blogModel = require("../models/blogModel.js");
 const userModel = require("../models/userModel.js");
 const CommentModel = require("../models/commentModel.js");
+const upload = require("../middlewares/multer.js");
+const uploadImage = require("../utils/uploadImage.js");
+const fs = require("fs");
 
 const getAllBlogs = async (req, res) => {
   try {
@@ -47,28 +50,32 @@ const getBlogById = async (req, res) => {
   }
 };
 const createBlog = async (req, res) => {
+  const creator = req.user;
+  const image = req.file;
+  const { title, description, draft } = req.body;
+  if (!title) {
+    return res.status(400).json({ message: "Title is required" });
+  }
+  if (!description) {
+    return res.status(400).json({ message: "Description is required" });
+  }
   try {
-    const creator = req.user;
-
-    // console.log(creator);
-
-    const { title, description, draft } = req.body;
-    if (!title) {
-      return res.status(400).json({ message: "Title is required" });
-    }
-    if (!description) {
-      return res.status(400).json({ message: "Description is required" });
-    }
-
     const findUser = await userModel.findById(creator);
     if (!findUser) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    const { secure_url, public_id } = await uploadImage(image.path);
+
+    fs.unlinkSync(image.path);
+
     const newBlog = await blogModel.create({
       title,
       description,
       draft,
       creator,
+      image: secure_url,
+      imageId: public_id,
     });
 
     await userModel.findByIdAndUpdate(creator, {
@@ -86,6 +93,7 @@ const createBlog = async (req, res) => {
     });
   }
 };
+
 const updateBlog = async (req, res) => {
   try {
     const blogId = req.params.id;
@@ -168,6 +176,8 @@ const deleteBlog = async (req, res) => {
     if (!deletedBlog) {
       return res.status(400).json({ message: "Requested blog dosen't exist." });
     }
+
+    // await duploadImage.eleteImageFromCloudinary(blog.imageId);
     return res.status(200).json({
       success: true,
       message: "User deleted successfully",

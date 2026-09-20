@@ -14,6 +14,7 @@ const {
   editComment,
   likeComment,
 } = require("../controllers/commentController.js");
+const upload = require("../middlewares/multer.js");
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ const router = express.Router();
 router.get("/blogs", getAllBlogs);
 
 // post a blog
-router.post("/blogs", verifyUser, createBlog);
+router.post("/blogs", verifyUser, upload.single("image"), createBlog);
 
 // get a blog by blog id
 router.get("/blogs/:id", getBlogById);
