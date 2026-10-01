@@ -2,8 +2,10 @@ const verifyUser = require("../middlewares/auth.js");
 const blogModel = require("../models/blogModel.js");
 const userModel = require("../models/userModel.js");
 const CommentModel = require("../models/commentModel.js");
-const upload = require("../middlewares/multer.js");
-const uploadImage = require("../utils/uploadImage.js");
+const { uploadImage } = require("../utils/uploadImage.js");
+// import { v4 as uuidv4 } from 'uuid';
+const { v4: uuidv4 } = require("uuid");
+
 const fs = require("fs");
 
 const getAllBlogs = async (req, res) => {
@@ -27,32 +29,57 @@ const getAllBlogs = async (req, res) => {
   }
 };
 const getBlogById = async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    if (!blogId) {
-      return res.status(400).json({ message: "Please provide a Blog ID" });
-    }
-    // const requestedBlog = await blogModel.findById(blogId).populate("creator");
-    const requestedBlog = await blogModel.findById(blogId).populate({
-      path: "creator",
-      select: "name",
+  const { blogId } = req.params;
+
+  // Validate blogId
+  if (!blogId) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide a Blog ID",
     });
+  }
+
+  try {
+    const requestedBlog = await blogModel.findOne({ blogId }).populate({
+      path: "creator",
+      select: "name avatar",
+      populate: {
+        path: "blogs",
+        select: "blogId title description image createdAt",
+      },
+    });
+
+    if (!requestedBlog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       requestedBlog,
     });
   } catch (error) {
-    console.log("Error in here", error);
+    console.error("Error fetching blog:", error);
+
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal server error",
+      error: error.message,
     });
   }
+};
+
+module.exports = {
+  getBlogById,
 };
 const createBlog = async (req, res) => {
   const creator = req.user;
   const image = req.file;
-  const { title, description, draft } = req.body;
+  console.log("from create blog", creator);
+
+  const { title, description, content, draft } = req.body;
   if (!title) {
     return res.status(400).json({ message: "Title is required" });
   }
@@ -60,18 +87,27 @@ const createBlog = async (req, res) => {
     return res.status(400).json({ message: "Description is required" });
   }
   try {
-    const findUser = await userModel.findById(creator);
+    const blogId =
+      title.toLowerCase().replace(/\s+/g, "-") +
+      "-" +
+      uuidv4().substring(0, 10);
+
+    const findUser = await userModel.findById(creator._id);
+    console.log("this is find user", findUser);
+
     if (!findUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const { secure_url, public_id } = await uploadImage(image.path);
+    const { secure_url, public_id } = await uploadImage(image?.path);
 
     fs.unlinkSync(image.path);
 
     const newBlog = await blogModel.create({
       title,
       description,
+      blogId,
+      content,
       draft,
       creator,
       image: secure_url,
@@ -90,6 +126,7 @@ const createBlog = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message,
+      message1: "error in create blog",
     });
   }
 };
@@ -163,15 +200,11 @@ const likeBlog = async (req, res) => {
 };
 
 const deleteBlog = async (req, res) => {
+  const blogId = req.params.id;
+  if (!blogId) {
+    return res.status(400).json({ message: "Please provide a Blog ID" });
+  }
   try {
-    console.log("deleteBlog");
-
-    const blogId = req.params.id;
-    console.log(blogId);
-
-    if (!blogId) {
-      return res.status(400).json({ message: "Please provide a Blog ID" });
-    }
     const deletedBlog = await blogModel.findByIdAndDelete(blogId);
     if (!deletedBlog) {
       return res.status(400).json({ message: "Requested blog dosen't exist." });

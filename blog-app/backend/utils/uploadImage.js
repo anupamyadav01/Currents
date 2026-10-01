@@ -1,7 +1,8 @@
 const cloudinary = require("cloudinary").v2;
 
-const uploadImage = async (imagePath) => {
+async function uploadImage(imagePath) {
   try {
+    console.log("inside upload image");
     const result = await cloudinary.uploader.upload(imagePath, {
       folder: "blog-app",
     });
@@ -10,7 +11,7 @@ const uploadImage = async (imagePath) => {
   } catch (error) {
     console.log(error);
   }
-};
+}
 
 const deleteImageFromCloudinary = async (imageId) => {
   try {

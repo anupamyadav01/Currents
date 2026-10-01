@@ -1,18 +1,24 @@
 const jwt = require("jsonwebtoken");
+const userModel = require("../models/userModel");
 const privateKey = "something-private-key";
-const authMiddleware = (req, res, next) => {
-  const token = req?.headers?.authorization?.split(" ")[1];
-  //   const token =
-  //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFudXBhbXk1NzFAZ21haWwuY29tIiwibmFtZSI6IkFudXBhbSBZYWRhdiIsImlkIjoiNmFhYTA2ZTFlYWExMmY2MjE5ODY0MDhmIiwiaWF0IjoxNzg5NTc2NTUzfQ.KmaCEkECAJkrGhdKhVcEwOVWYt-j6-QVz4Z2u782XnE";
+const authMiddleware = async (req, res, next) => {
+  // const token = req?.headers?.authorization?.split(" ")[1];
+  const token = req.cookies.token;
+  // console.log("token from cookes", token);
+
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Not authenticated",
-    });
+    return res.status(401).json({ message: "Not authenticated, no token" });
   }
   try {
     const decoded = jwt.verify(token, privateKey);
-    req.userId = decoded.id;
+    const user = await userModel.findById(decoded.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // console.log(decoded, user);
+
+    req.user = user;
     next();
   } catch (error) {
     return res.status(401).json({

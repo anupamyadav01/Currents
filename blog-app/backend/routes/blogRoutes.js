@@ -7,7 +7,7 @@ const {
   deleteBlog,
   likeBlog,
 } = require("../controllers/blogController.js");
-const verifyUser = require("../middlewares/auth.js");
+// const verifyUser = require("../middlewares/auth.js");
 const {
   addComment,
   deleteComment,
@@ -15,6 +15,7 @@ const {
   likeComment,
 } = require("../controllers/commentController.js");
 const upload = require("../middlewares/multer.js");
+const authMiddleware = require("../middlewares/authMiddleware.js");
 
 const router = express.Router();
 
@@ -22,31 +23,31 @@ const router = express.Router();
 router.get("/blogs", getAllBlogs);
 
 // post a blog
-router.post("/blogs", verifyUser, upload.single("image"), createBlog);
+router.post("/blogs", authMiddleware, upload.single("image"), createBlog);
 
 // get a blog by blog id
-router.get("/blogs/:id", getBlogById);
+router.get("/blogs/:blogId", getBlogById);
 
 // update blog
-router.patch("/blogs/:id", verifyUser, updateBlog);
+router.patch("/blogs/:id", authMiddleware, updateBlog);
 
 // like a blog
-router.post("/blogs/like/:id", verifyUser, likeBlog);
+router.post("/blogs/like/:id", authMiddleware, likeBlog);
 
 //delete blog
-router.delete("/blogs/:id", verifyUser, deleteBlog);
+router.delete("/blogs/:id", authMiddleware, deleteBlog);
 
 // _____________________________________________________________________
 // comment using blog id
-router.post("/blogs/comment/:id", verifyUser, addComment);
+router.post("/blogs/comment/:id", authMiddleware, addComment);
 
 // delete comment usign id
-router.delete("/blogs/comment/:id", verifyUser, deleteComment);
+router.delete("/blogs/comment/:id", authMiddleware, deleteComment);
 
 // edit comment
-router.patch("/blogs/comment/:id", verifyUser, editComment);
+router.patch("/blogs/comment/:id", authMiddleware, editComment);
 
 // like comment
-router.patch("/blogs/comment/:id", verifyUser, likeComment);
+router.patch("/blogs/comment/:id", authMiddleware, likeComment);
 
 module.exports = router;

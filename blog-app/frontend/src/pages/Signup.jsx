@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -27,25 +28,18 @@ const Signup = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/v1/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/users",
+        userData,
+      );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create account");
-      }
-
+      const data = response.data;
       console.log("Signup successful:", data);
-      // Navigate to login or home page after signup
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      const errorMessage =
+        err.response?.data?.message || "Failed to create account";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

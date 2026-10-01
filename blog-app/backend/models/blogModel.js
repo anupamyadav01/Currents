@@ -7,18 +7,27 @@ const blogSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    blogId: {
+      type: String,
+      unique: true,
+    },
     description: {
       type: String,
       required: true,
       trim: true,
     },
+    content: {
+      type: String,
+      // required: true,
+      trim: true,
+    },
     image: {
       type: String,
-      required: true,
+      // required: true,
     },
     imageId: {
       type: String,
-      required: true,
+      // required: true,
     },
     draft: {
       type: Boolean,
@@ -46,6 +55,6 @@ const blogSchema = new mongoose.Schema(
   },
 );
 
-const blogModel = mongoose.model("blog", blogSchema);
+const blogModel = mongoose.model("Blog", blogSchema);
 
 module.exports = blogModel;
