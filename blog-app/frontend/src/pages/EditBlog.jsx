@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
-import BlogForm from "../components/BlogForm";
+import BlogForm from "../components/Form/BlogForm";
 
 const EditBlog = () => {
   const { id } = useParams();

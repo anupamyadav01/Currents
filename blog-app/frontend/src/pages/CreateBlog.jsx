@@ -1,5 +1,5 @@
 import { useState } from "react";
-import BlogForm from "../components/BlogForm";
+import BlogForm from "../components/Form/BlogForm";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 

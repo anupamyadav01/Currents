@@ -7,7 +7,7 @@ const MoreActions = ({
   onEditListInfo,
   onMakePublic,
   onHideResponses,
-  onDeleteBlog,
+  deleteBlog,
 }) => {
   const menuRef = useRef(null);
 
@@ -79,7 +79,7 @@ const MoreActions = ({
         {/* Delete blog button */}
         <button
           type="button"
-          onClick={() => handleAction(onDeleteBlog)}
+          onClick={deleteBlog}
           className="w-full cursor-pointer px-4 py-2 text-left font-normal text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
         >
           Delete blog

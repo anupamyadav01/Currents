@@ -261,15 +261,25 @@ const likeBlog = async (req, res) => {
 
 const deleteBlog = async (req, res) => {
   const blogId = req.params.id;
+  // console.log(blogId);
   if (!blogId) {
     return res.status(400).json({ message: "Please provide a Blog ID" });
   }
   try {
-    const deletedBlog = await blogModel.findByIdAndDelete(blogId);
-    if (!deletedBlog) {
-      return res.status(400).json({ message: "Requested blog dosen't exist." });
-    }
+    const deletedBlog = await blogModel.deleteOne({ blogId });
+    console.log(deleteBlog);
 
+    if (deletedBlog.deletedCount === 1) {
+      return res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
     // await duploadImage.eleteImageFromCloudinary(blog.imageId);
     return res.status(200).json({
       success: true,

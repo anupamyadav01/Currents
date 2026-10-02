@@ -4,7 +4,7 @@ const privateKey = "something-private-key";
 const authMiddleware = async (req, res, next) => {
   // const token = req?.headers?.authorization?.split(" ")[1];
   const token = req.cookies.token;
-  console.log("token from cookes", token);
+  // console.log("token from cookes", token);
 
   if (!token) {
     return res.status(401).json({ message: "Not authenticated, no token" });

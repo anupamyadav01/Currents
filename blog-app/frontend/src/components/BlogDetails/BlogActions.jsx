@@ -7,7 +7,11 @@ import {
   Share2,
 } from "lucide-react";
 
-import MoreActions from "../MoreActions";
+import MoreActionsPopup from "./MoreActionsPopup";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../../api/axios";
+import { useDispatch } from "react-redux";
+import { removeBlog } from "../../features/blog/blogSlice";
 
 const BlogActions = ({
   isLiked,
@@ -22,6 +26,23 @@ const BlogActions = ({
   onToggleMenu,
   onCloseMenu,
 }) => {
+  const { blogId } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const deleteBlog = async () => {
+    try {
+      const response = await api.delete(`/v1/blogs/${blogId}`);
+      // const data = response.data;
+      if (response.data.sucsess) {
+        dispatch(dispatch(removeBlog(blogId)));
+      }
+      navigate("/");
+      // console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="flex items-center justify-between border-b border-zinc-100 py-4">
       {/* Left */}
@@ -99,7 +120,8 @@ const BlogActions = ({
             <MoreHorizontal size={20} strokeWidth={1.8} />
           </button>
 
-          <MoreActions
+          <MoreActionsPopup
+            deleteBlog={deleteBlog}
             isOpen={isMenuOpen}
             onClose={onCloseMenu}
             onCopyLink={onCopyLink}

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../features/auth/authSlice";
-import api from "../api/axios"; // Central axios instance with withCredentials: true
+import { logout } from "../../features/auth/authSlice";
+import api from "../../api/axios"; // Central axios instance with withCredentials: true
 import ProfileDropdown from "./ProfileDropdown";
 
 const Navbar = () => {
