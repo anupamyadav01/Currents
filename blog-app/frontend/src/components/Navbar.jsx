@@ -3,15 +3,16 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../features/auth/authSlice";
 import api from "../api/axios"; // Central axios instance with withCredentials: true
+import ProfileDropdown from "./ProfileDropdown";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showProfile, setShowProfile] = useState(false);
 
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
-  // Scroll tracking for floating dynamic dock feel
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -32,7 +33,6 @@ const Navbar = () => {
   // Logout Logic
   const handleLogout = async () => {
     try {
-      // 1. Backend cookie delete request
       await api.post("/auth/logout");
     } catch (error) {
       console.error(
@@ -40,7 +40,6 @@ const Navbar = () => {
         error.response?.data?.message || error.message,
       );
     } finally {
-      // 2. Clear Redux State
       dispatch(logout());
       navigate("/login");
     }
@@ -48,27 +47,23 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 right-0 left-0 z-50 flex justify-center transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        isScrolled ? "px-4 pt-3.5 sm:px-6" : "px-4 pt-5 sm:px-8"
+      className={`fixed inset-x-0 top-0 z-50 flex justify-center transition-all duration-500 ${
+        isScrolled ? "px-4 pt-3" : "px-6 pt-5"
       }`}
     >
-      {/* Liquid Glass Navigation Shell */}
       <nav
-        className={`relative flex w-full items-center justify-between transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isScrolled
-            ? "max-w-5xl rounded-3xl border border-white/40 bg-white/65 px-5 py-2.5 shadow-[0_8px_32px_0_rgba(15,23,42,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.9),inset_0_-1px_1px_0_rgba(0,0,0,0.03)] backdrop-blur-2xl backdrop-saturate-200"
-            : "max-w-6xl rounded-2xl border border-white/20 bg-white/45 px-6 py-3.5 shadow-[0_4px_24px_0_rgba(15,23,42,0.04),inset_0_1px_2px_0_rgba(255,255,255,0.7)] backdrop-blur-xl"
-        }`}
+        className={`relative flex w-full items-center justify-between transition-all duration-300 ${
+          isScrolled ? "max-w-5xl px-5 py-2.5" : "max-w-6xl px-6 py-3.5"
+        } rounded-[16px] border border-white/[0.12] bg-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-[7.5px]`}
       >
-        {/* Ambient Top Glow Line */}
-        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
 
         {/* LOGO */}
         <div
           onClick={() => navigate("/")}
           className="group flex cursor-pointer items-center gap-3 select-none"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 text-white shadow-[0_2px_10px_rgba(0,0,0,0.2)] transition-transform duration-300 group-hover:scale-105">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 text-white shadow-[0_2px_10px_rgba(0,0,0,0.15)] transition-transform duration-300 group-hover:scale-105">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -84,23 +79,23 @@ const Navbar = () => {
         </div>
 
         {/* CENTER NAV LINKS */}
-        <div className="hidden items-center gap-1 rounded-full border border-black/5 bg-black/[0.03] p-1 text-xs font-medium tracking-wide text-zinc-600 sm:flex">
+        <div className="hidden items-center gap-1 rounded-full bg-black/[0.04] p-1 text-xs font-medium tracking-wide text-zinc-700 backdrop-blur-md sm:flex">
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white hover:text-zinc-950 hover:shadow-xs"
+            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white/60 hover:text-zinc-950 hover:shadow-xs"
           >
             Stories
           </button>
           <button
             type="button"
-            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white hover:text-zinc-950 hover:shadow-xs"
+            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white/60 hover:text-zinc-950 hover:shadow-xs"
           >
             Featured
           </button>
           <button
             type="button"
-            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white hover:text-zinc-950 hover:shadow-xs"
+            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white/60 hover:text-zinc-950 hover:shadow-xs"
           >
             Community
           </button>
@@ -112,7 +107,7 @@ const Navbar = () => {
           <button
             onClick={handleWriteBlog}
             type="button"
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-3.5 py-1.5 text-xs font-semibold text-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.04)] backdrop-blur-md transition-all duration-200 hover:border-zinc-300 hover:bg-white hover:shadow-sm active:scale-95"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-white/40 px-3.5 py-1.5 text-xs font-semibold text-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.03)] backdrop-blur-md transition-all duration-200 hover:bg-white/70 active:scale-95"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -135,9 +130,10 @@ const Navbar = () => {
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               {/* User Avatar Badge */}
-              <div
+              <button
+                onClick={() => setShowProfile((prev) => !prev)}
                 title={user?.email || "User Profile"}
-                className="group relative flex h-9 items-center gap-2 rounded-full border border-white/60 bg-white/80 py-1 pr-3 pl-1.5 shadow-xs backdrop-blur-md select-none"
+                className="group relative flex h-9 cursor-pointer items-center gap-2 rounded-full bg-white/35 py-1 pr-3 pl-1.5 shadow-xs backdrop-blur-md transition-colors select-none hover:bg-white/55"
               >
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 text-[11px] font-bold text-white uppercase shadow-xs">
                   {user?.name?.[0] || "U"}
@@ -146,29 +142,6 @@ const Navbar = () => {
                   {user?.name?.split(" ")[0] || "User"}
                 </span>
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-              </div>
-
-              {/* Logout Button */}
-              <button
-                type="button"
-                onClick={handleLogout}
-                title="Log Out"
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-red-200/50 bg-red-50/60 text-red-600 shadow-xs backdrop-blur-md transition-all duration-200 hover:bg-red-500 hover:text-white active:scale-95"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="h-4 w-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-                  />
-                </svg>
               </button>
             </div>
           ) : (
@@ -183,13 +156,20 @@ const Navbar = () => {
               <button
                 onClick={() => navigate("/signup")}
                 type="button"
-                className="cursor-pointer rounded-full border border-zinc-950/20 bg-zinc-950 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 active:scale-95"
+                className="cursor-pointer rounded-full bg-zinc-950 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 active:scale-95"
               >
                 Get Started
               </button>
             </div>
           )}
         </div>
+
+        {/* Profile Dropdown */}
+        {showProfile && (
+          <div className="absolute top-full right-0 z-50 mt-2">
+            <ProfileDropdown handleLogout={handleLogout} />
+          </div>
+        )}
       </nav>
     </header>
   );

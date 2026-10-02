@@ -71,9 +71,6 @@ const getBlogById = async (req, res) => {
   }
 };
 
-module.exports = {
-  getBlogById,
-};
 const createBlog = async (req, res) => {
   const creator = req.user;
   const image = req.file;
@@ -134,24 +131,87 @@ const createBlog = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const blogId = req.params.id;
-    console.log(blogId);
-
-    const data = req.body;
     if (!blogId) {
-      return res.status(400).json({ message: "Invalid blog update request" });
+      return res.status(400).json({
+        success: false,
+        message: "Blog ID is required",
+      });
     }
-    const requestedBlog = await blogModel.findByIdAndUpdate(blogId, data, {
-      returnDocument: "after",
-    });
-    if (!requestedBlog) {
-      return res.status(400).json({ message: "Requested blog dosen't exist." });
+
+    const existingBlog = await blogModel.findOne({ blogId });
+    if (!existingBlog) {
+      return res.status(404).json({
+        success: false,
+        message: "Requested blog doesn't exist.",
+      });
     }
+
+    const { title, description, content, draft } = req.body;
+    if (!title) {
+      return res.status(400).json({
+        success: false,
+        message: "Title is required",
+      });
+    }
+    if (!description) {
+      return res.status(400).json({
+        success: false,
+        message: "Description is required",
+      });
+    }
+
+    const updateData = {
+      title,
+      description,
+      content,
+    };
+
+    if (draft !== undefined) {
+      updateData.draft = draft;
+    }
+
+    if (req.file) {
+      const { secure_url, public_id } = await uploadImage(req.file.path);
+
+      fs.unlinkSync(req.file.path);
+
+      updateData.image = secure_url;
+      updateData.imageId = public_id;
+      if (existingBlog.imageId) {
+        try {
+          await deleteImage(existingBlog.imageId);
+        } catch (cloudinaryError) {
+          console.error("Failed to delete old image:", cloudinaryError.message);
+        }
+      }
+    }
+    const updatedBlog = await blogModel.findOneAndUpdate(
+      { blogId },
+      { $set: updateData },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
     return res.status(200).json({
       success: true,
       message: "Blog updated successfully",
-      updatedBlog: requestedBlog,
+      updatedBlog,
     });
   } catch (error) {
+    console.error("UPDATE BLOG ERROR:", error);
+
+    if (req.file?.path) {
+      try {
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+      } catch (fileError) {
+        console.error("Failed to cleanup temp file:", fileError.message);
+      }
+    }
+
     return res.status(500).json({
       success: false,
       message: error.message,

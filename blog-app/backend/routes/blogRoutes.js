@@ -29,7 +29,7 @@ router.post("/blogs", authMiddleware, upload.single("image"), createBlog);
 router.get("/blogs/:blogId", getBlogById);
 
 // update blog
-router.patch("/blogs/:id", authMiddleware, updateBlog);
+router.patch("/blogs/:id", authMiddleware, upload.single("image"), updateBlog);
 
 // like a blog
 router.post("/blogs/like/:id", authMiddleware, likeBlog);

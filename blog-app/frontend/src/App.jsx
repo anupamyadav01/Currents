@@ -6,12 +6,13 @@ import Blogs from "./pages/AllBlogs";
 import BlogDetails from "./pages/BlogDetails";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
-import AddBlog from "./pages/AddBlog";
 import Error from "./pages/Error";
 import { useEffect, useState } from "react";
 import api from "./api/axios";
 import { useDispatch } from "react-redux";
 import { logout, setCredentials } from "./features/auth/authSlice";
+import CreateBlog from "./pages/CreateBlog";
+import EditBlog from "./pages/EditBlog";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -47,8 +48,8 @@ const App = () => {
           <Route path="/blog-details/:blogId" element={<BlogDetails />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/create-blog" element={<AddBlog />} />
-          <Route path="/update-blog/:id" element={<AddBlog />} />
+          <Route path="/create-blog" element={<CreateBlog />} />
+          <Route path="/update-blog/:id" element={<EditBlog />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </main>
