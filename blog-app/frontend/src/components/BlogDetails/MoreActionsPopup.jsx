@@ -1,15 +1,11 @@
 import { useEffect, useRef } from "react";
+import useBlogDetails from "../../hooks/useBlogDetails";
+import { useParams } from "react-router-dom";
 
-const MoreActions = ({
-  isOpen,
-  onClose,
-  onCopyLink,
-  onEditListInfo,
-  onMakePublic,
-  onHideResponses,
-  deleteBlog,
-}) => {
+const MoreActions = ({ isOpen, onClose, onMakePublic, onHideResponses }) => {
   const menuRef = useRef(null);
+  const { blogId } = useParams();
+  const { handleEditBlog, deleteBlog, handleCopyLink } = useBlogDetails(blogId);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -34,55 +30,49 @@ const MoreActions = ({
   return (
     <div
       ref={menuRef}
-      className="animate-in fade-in zoom-in-95 absolute top-full right-0 z-50 mt-2.5 w-44 rounded-md border border-zinc-100/80 bg-white py-2 text-[14px] text-zinc-600 shadow-[0_4px_20px_rgba(0,0,0,0.12)] duration-100 select-none"
+      className="absolute top-full right-0 z-50 mt-2 w-48 rounded border border-[#f2f2f2] bg-white py-1.5 text-[13px] text-[#242424] shadow-[0_2px_10px_rgba(0,0,0,0.08)] select-none"
     >
-      {/* Top pointer arrow notch */}
-      <div className="absolute -top-1.5 right-3.5 h-3 w-3 rotate-45 border-t border-l border-zinc-100/80 bg-white" />
-
-      {/* Menu Options */}
-      <div className="relative z-10 flex flex-col">
+      <div className="flex flex-col">
         <button
           type="button"
-          onClick={() => handleAction(onCopyLink)}
-          className="w-full cursor-pointer px-4 py-2 text-left transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+          onClick={() => handleAction(handleCopyLink)}
+          className="w-full px-4 py-2 text-left transition-colors hover:bg-[#fafafa]"
         >
           Copy link
         </button>
 
         <button
           type="button"
-          onClick={() => handleAction(onEditListInfo)}
-          className="w-full cursor-pointer px-4 py-2 text-left transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+          onClick={() => handleAction(handleEditBlog)}
+          className="w-full px-4 py-2 text-left transition-colors hover:bg-[#fafafa]"
         >
-          Edit list info
+          Edit story
         </button>
 
         <button
           type="button"
           onClick={() => handleAction(onMakePublic)}
-          className="w-full cursor-pointer px-4 py-2 text-left transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+          className="w-full px-4 py-2 text-left transition-colors hover:bg-[#fafafa]"
         >
-          Make list public
+          Make story public
         </button>
 
         <button
           type="button"
           onClick={() => handleAction(onHideResponses)}
-          className="w-full cursor-pointer px-4 py-2 text-left transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+          className="w-full px-4 py-2 text-left transition-colors hover:bg-[#fafafa]"
         >
           Hide responses
         </button>
 
-        {/* Subtle separator */}
-        <div className="my-1 border-t border-zinc-100" />
+        <div className="my-1 border-t border-[#f2f2f2]" />
 
-        {/* Delete blog button */}
         <button
           type="button"
-          onClick={deleteBlog}
-          className="w-full cursor-pointer px-4 py-2 text-left font-normal text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+          onClick={() => handleAction(deleteBlog)}
+          className="w-full px-4 py-2 text-left text-[#c93b2b] transition-colors hover:bg-[#fafafa]"
         >
-          Delete blog
+          Delete story
         </button>
       </div>
     </div>

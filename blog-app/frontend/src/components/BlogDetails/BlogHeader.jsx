@@ -1,4 +1,4 @@
-import { BadgeCheck } from "lucide-react";
+import { Sparkles, Plus, BadgeCheck } from "lucide-react";
 
 const BlogHeader = ({
   blog,
@@ -7,79 +7,98 @@ const BlogHeader = ({
   authorAvatar,
   authorInitial,
 }) => {
+  // Fallback tags if not present in blog data
+  const tags = blog.tags || [
+    "Lifestyle",
+    "Productivity",
+    "Self",
+    "Work Life Balance",
+    "Philosophy",
+  ];
+
   return (
     <header>
+      {/* Member-only Story Badge */}
+      <div className="inline-flex items-center gap-1.5 rounded-full bg-[#f9f9f9] px-3 py-1 text-xs font-normal text-[#6b6b6b]">
+        <Sparkles size={13} className="fill-amber-500 text-amber-500" />
+        <span>Member-only story</span>
+      </div>
+
+      {/* Topic Tags */}
+      <div className="flex flex-wrap items-center gap-2 py-2">
+        {tags.map((tag) => (
+          <button
+            key={tag}
+            type="button"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-[#e6e6e6] bg-[#fafafa] px-3 py-1 text-xs text-[#242424] transition-colors hover:border-[#b3b3b3] hover:bg-white"
+          >
+            <span>{tag}</span>
+            <Plus
+              size={12}
+              className="text-[#6b6b6b] transition-transform group-hover:rotate-90"
+            />
+          </button>
+        ))}
+      </div>
+
       {/* Title */}
-      <h1 className="max-w-4xl p-1 font-serif text-[2rem] leading-normal font-semibold tracking-[-0.035em] text-zinc-950 sm:text-5xl lg:text-[3rem]">
+      <h1 className="pt-2 font-sans text-[32px] leading-[1.18] font-bold tracking-[-0.025em] text-[#242424] sm:text-[40px] md:text-[44px]">
         {blog.title}
       </h1>
 
-      {/* Description */}
+      {/* Subtitle / Description */}
       {blog.description && (
-        <p className="mt-5 max-w-3xl px-4 font-sans text-lg leading-8 text-zinc-500 sm:text-lg sm:leading-8">
+        <p className="pt-2 font-sans text-[20px] leading-relaxed font-normal text-[#6b6b6b]">
           {blog.description}
         </p>
       )}
 
-      {/* Author section */}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-5 border-b border-zinc-100 pb-7">
-        <div className="flex items-center gap-3">
-          {/* Avatar */}
-          {authorAvatar ? (
-            <img
-              src={authorAvatar}
-              alt={authorName}
-              className="h-11 w-11 rounded-full object-cover ring-1 ring-zinc-200"
-            />
-          ) : (
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white">
-              {authorInitial}
-            </div>
-          )}
-
-          {/* Author info */}
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold text-zinc-900">
-                {authorName}
-              </span>
-
-              <BadgeCheck size={16} className="fill-blue-500 text-white" />
-
-              <button
-                type="button"
-                className="ml-1 text-xs font-semibold text-zinc-900 transition-colors hover:text-blue-600"
-              >
-                Follow
-              </button>
-            </div>
-
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-              <span>
-                {blog.createdAt
-                  ? new Date(blog.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "Recently"}
-              </span>
-
-              <span>·</span>
-
-              <span>{readTime} min read</span>
-
-              {blog.draft && (
-                <>
-                  <span>·</span>
-
-                  <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700">
-                    Draft
-                  </span>
-                </>
-              )}
-            </div>
+      {/* Author Row */}
+      <div className="flex items-center gap-3 pt-3">
+        {/* Avatar */}
+        {authorAvatar ? (
+          <img
+            src={authorAvatar}
+            alt={authorName}
+            className="h-10 w-10 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#242424] text-xs font-medium text-white">
+            {authorInitial}
           </div>
+        )}
+
+        {/* Info & Meta */}
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm">
+          <div className="flex items-center gap-1">
+            <span className="cursor-pointer font-medium text-[#242424] hover:underline">
+              {authorName}
+            </span>
+            <BadgeCheck size={16} className="fill-[#1a8917] text-white" />
+          </div>
+
+          <button
+            type="button"
+            className="rounded-full border border-[#242424] px-3 py-0.5 text-xs font-normal text-[#242424] transition hover:bg-[#242424] hover:text-white"
+          >
+            Follow
+          </button>
+
+          <span className="text-[#6b6b6b]">·</span>
+
+          <span className="text-[#6b6b6b]">{readTime} min read</span>
+
+          <span className="text-[#6b6b6b]">·</span>
+
+          <span className="text-[#6b6b6b]">
+            {blog.createdAt
+              ? new Date(blog.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : "Aug 4, 2026"}
+          </span>
         </div>
       </div>
     </header>

@@ -1,133 +1,129 @@
 import {
   Bookmark,
   Check,
-  Heart,
   MessageCircle,
   MoreHorizontal,
-  Share2,
+  Play,
+  Repeat2,
+  Share,
 } from "lucide-react";
-
 import MoreActionsPopup from "./MoreActionsPopup";
-import { useNavigate, useParams } from "react-router-dom";
-import api from "../../api/axios";
-import { useDispatch } from "react-redux";
-import { removeBlog } from "../../features/blog/blogSlice";
+import useBlogDetails from "../../hooks/useBlogDetails";
+import { useParams } from "react-router-dom";
+import { useState } from "react";
+import Like, { Dislike } from "../other/LikeIcon";
 
 const BlogActions = ({
-  isLiked,
-  likeCount,
-  commentCount,
+  commentCount = "25",
+  responseCount = "3",
   isBookmarked,
   copied,
   isMenuOpen,
-  onLike,
   onBookmark,
   onCopyLink,
   onToggleMenu,
   onCloseMenu,
 }) => {
   const { blogId } = useParams();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const deleteBlog = async () => {
-    try {
-      const response = await api.delete(`/v1/blogs/${blogId}`);
-      // const data = response.data;
-      if (response.data.sucsess) {
-        dispatch(dispatch(removeBlog(blogId)));
-      }
-      navigate("/");
-      // console.log(response.data);
-    } catch (error) {
-      console.log(error);
-    }
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(20);
+  const { like, handleComment } = useBlogDetails(blogId);
+  const handleLike = () => {
+    setIsLiked((p) => !p);
   };
+
   return (
-    <div className="flex items-center justify-between border-b border-zinc-100 py-4">
-      {/* Left */}
+    <div className="flex items-center justify-between text-sm text-[#6b6b6b]">
+      {/* Left Actions: Claps, Comments, Responses */}
       <div className="flex items-center gap-5 sm:gap-6">
-        {/* Like */}
+        {/* Claps */}
         <button
           type="button"
-          onClick={onLike}
-          aria-label={isLiked ? "Unlike story" : "Like story"}
-          className="group inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-zinc-950"
+          onClick={handleLike}
+          className={`group inline-flex items-center gap-1.5 transition-colors hover:text-[#242424]`}
         >
-          <Heart
-            size={20}
-            strokeWidth={1.8}
-            className={`transition-all duration-300 ${
-              isLiked ? "fill-red-500 text-red-500" : "group-hover:scale-110"
-            }`}
-          />
+          <span className="cursor-pointer">
+            {isLiked ? <Like size={18} /> : <Dislike size={18} />}
+          </span>
 
-          <span>{likeCount}</span>
+          <span className="text-[13px]">{likeCount}</span>
         </button>
 
         {/* Comments */}
-        <div className="flex items-center gap-2 text-sm text-zinc-500">
-          <MessageCircle size={20} strokeWidth={1.8} />
+        <button
+          type="button"
+          onClick={handleComment}
+          className="group inline-flex items-center gap-1.5 transition-colors hover:text-[#242424]"
+        >
+          <MessageCircle size={18} strokeWidth={1.6} />
+          <span className="text-[13px]">{commentCount}</span>
+        </button>
 
-          <span>{commentCount}</span>
-        </div>
+        {/* Responses / Re-posts */}
+        <button
+          type="button"
+          className="group inline-flex items-center gap-1.5 transition-colors hover:text-[#242424]"
+        >
+          <Repeat2 size={18} strokeWidth={1.6} />
+          <span className="text-[13px]">{responseCount}</span>
+        </button>
       </div>
 
-      {/* Right */}
-      <div className="flex items-center gap-1 sm:gap-2">
+      {/* Right Actions: Bookmark, Listen, Share, More */}
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Bookmark */}
         <button
           type="button"
           onClick={onBookmark}
-          aria-label={isBookmarked ? "Remove bookmark" : "Bookmark story"}
-          className="rounded-full p-2 text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-950"
+          aria-label="Save story"
+          className="rounded-full p-1.5 transition-colors hover:text-[#242424]"
         >
           <Bookmark
-            size={20}
-            strokeWidth={1.8}
-            className={isBookmarked ? "fill-zinc-900 text-zinc-900" : ""}
+            size={18}
+            strokeWidth={1.6}
+            className={isBookmarked ? "fill-[#242424] text-[#242424]" : ""}
           />
+        </button>
+
+        {/* Listen / Play */}
+        <button
+          type="button"
+          aria-label="Listen to story"
+          className="rounded-full p-1.5 transition-colors hover:text-[#242424]"
+        >
+          <Play size={18} strokeWidth={1.6} className="fill-[#6b6b6b]" />
         </button>
 
         {/* Share */}
         <button
           type="button"
           onClick={onCopyLink}
-          aria-label="Copy story link"
-          className="relative rounded-full p-2 text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-950"
+          aria-label="Share story"
+          className="relative rounded-full p-1.5 transition-colors hover:text-[#242424]"
         >
-          {copied ? (
-            <Check size={20} />
-          ) : (
-            <Share2 size={20} strokeWidth={1.8} />
-          )}
-
+          {copied ? <Check size={18} /> : <Share size={18} strokeWidth={1.6} />}
           {copied && (
-            <span className="absolute top-10 right-0 z-10 rounded-md bg-zinc-900 px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-white shadow-lg">
+            <span className="absolute top-8 right-0 z-10 rounded-md bg-[#242424] px-2.5 py-1 text-xs whitespace-nowrap text-white shadow-md">
               Link copied
             </span>
           )}
         </button>
 
-        {/* More menu */}
+        {/* More Options */}
         <div className="relative">
           <button
             type="button"
             onClick={onToggleMenu}
             aria-label="More options"
-            className="cursor-pointer rounded-full p-2 text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-950"
+            className="rounded-full p-1.5 transition-colors hover:text-[#242424]"
           >
-            <MoreHorizontal size={20} strokeWidth={1.8} />
+            <MoreHorizontal size={18} strokeWidth={1.6} />
           </button>
 
           <MoreActionsPopup
-            deleteBlog={deleteBlog}
             isOpen={isMenuOpen}
             onClose={onCloseMenu}
             onCopyLink={onCopyLink}
-            onEditListInfo={() => console.log("Edit list clicked")}
-            onMakePublic={() => console.log("Make public clicked")}
-            onHideResponses={() => console.log("Hide responses clicked")}
           />
         </div>
       </div>

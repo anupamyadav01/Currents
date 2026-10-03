@@ -222,9 +222,10 @@ const updateBlog = async (req, res) => {
 const likeBlog = async (req, res) => {
   try {
     const blogId = req.params.id;
-    const userId = req.user;
+    const user = req.user;
+    console.log("like blog", blogId, user);
 
-    const blog = await blogModel.findById(blogId);
+    const blog = await blogModel.findOne({ blogId });
     if (!blog) {
       return res.status(404).json({
         success: false,
@@ -233,16 +234,20 @@ const likeBlog = async (req, res) => {
     }
 
     const alreadyLiked = blog.like?.some(
-      (id) => id.toString() === userId.toString(),
+      (id) => id.toString() === user?._id?.toString(),
     );
 
     const updateQuery = alreadyLiked
-      ? { $pull: { like: userId } }
-      : { $push: { like: userId } };
+      ? { $pull: { like: user?._id } }
+      : { $push: { like: user?._id } };
 
-    const updatedBlog = await blogModel.findByIdAndUpdate(blogId, updateQuery, {
-      new: true,
-    });
+    const updatedBlog = await blogModel.findOneAndUpdate(
+      { blogId },
+      updateQuery,
+      {
+        new: true,
+      },
+    );
 
     return res.status(200).json({
       success: true,

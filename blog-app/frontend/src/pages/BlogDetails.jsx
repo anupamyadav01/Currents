@@ -1,8 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-
 import useBlogDetails from "../hooks/useBlogDetails";
-
 import BlogDetailsSkeleton from "../components/BlogDetails/BlogDetailsSkeleton";
 import BlogNotFound from "../components/BlogDetails/BlogNotFound";
 import BlogHeader from "../components/BlogDetails/BlogHeader";
@@ -10,12 +8,7 @@ import BlogActions from "../components/BlogDetails/BlogActions";
 import BlogContent from "../components/BlogDetails/BlogContent";
 import BlogFooter from "../components/BlogDetails/BlogFooter";
 import BlogCoverImage from "../components/BlogDetails/BlogCoverImage";
-
-import {
-  getAuthorData,
-  getBlogContentData,
-  getCommentCount,
-} from "../utils/blogUtils";
+import { getAuthorData, getBlogContentData } from "../utils/blogUtils";
 
 const BlogDetails = () => {
   const { blogId } = useParams();
@@ -24,13 +17,8 @@ const BlogDetails = () => {
     blog,
     loading,
     error,
-    isLiked,
-    likeCount,
-    isBookmarked,
     copied,
     isMenuOpen,
-    handleLike,
-    handleBookmark,
     handleCopyLink,
     toggleMenu,
     closeMenu,
@@ -45,7 +33,6 @@ const BlogDetails = () => {
   }
 
   const { paragraphs, readTime } = getBlogContentData(blog);
-  const commentCount = getCommentCount(blog);
   const { authorName, authorAvatar, authorInitial } = getAuthorData(blog);
 
   return (
@@ -66,7 +53,7 @@ const BlogDetails = () => {
       </nav>
 
       <article className="w-full pb-24">
-        <header className="mx-auto max-w-[680px] px-5 pt-8">
+        <header className="mx-auto max-w-[680px] pt-8">
           <BlogHeader
             blog={blog}
             readTime={readTime}
@@ -77,14 +64,8 @@ const BlogDetails = () => {
 
           <div className="mt-8 border-y border-[#f2f2f2] py-2.5">
             <BlogActions
-              isLiked={isLiked}
-              likeCount={likeCount}
-              commentCount={commentCount}
-              isBookmarked={isBookmarked}
               copied={copied}
               isMenuOpen={isMenuOpen}
-              onLike={handleLike}
-              onBookmark={handleBookmark}
               onCopyLink={handleCopyLink}
               onToggleMenu={toggleMenu}
               onCloseMenu={closeMenu}
@@ -93,31 +74,28 @@ const BlogDetails = () => {
         </header>
 
         {blog.image && (
-          <figure className="mx-auto my-10 w-full max-w-[800px] px-0 sm:px-5">
-            <div className="overflow-hidden">
-              <BlogCoverImage
-                image={blog.image}
-                title={blog.title}
-                className="w-full object-cover"
-              />
-            </div>
-            {blog.imageCaption && (
-              <figcaption className="mt-2 text-center text-xs tracking-tight text-[#6b6b6b]">
-                {blog.imageCaption}
-              </figcaption>
-            )}
+          <figure className="mx-auto my-10 w-full max-w-[720px] px-0 sm:px-5">
+            <BlogCoverImage
+              image={blog.image}
+              title={blog.title}
+              caption={blog.imageCaption}
+            />
           </figure>
         )}
-        <section className="mx-auto text-[16px] sm:text-[20px]">
+        <section className="mx-auto w-full">
           <BlogContent
             paragraphs={paragraphs}
             fallbackText={blog.description}
           />
         </section>
 
-        <footer className="mx-auto mt-16 max-w-[680px] px-5">
-          <div className="border-t border-[#f2f2f2] pt-6">
-            <BlogFooter readTime={readTime} onShare={handleCopyLink} />
+        <footer className="mx-auto mt-14 max-w-[680px] px-5">
+          <div className="border-y border-[#f2f2f2] py-2.5">
+            <BlogFooter
+              onShare={handleCopyLink}
+              onLike={() => {}}
+              onComment={() => {}}
+            />
           </div>
         </footer>
       </article>

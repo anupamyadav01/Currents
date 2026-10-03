@@ -1,18 +1,22 @@
-const BlogCoverImage = ({ image, title }) => {
-  if (!image) {
-    return null;
-  }
+const BlogCoverImage = ({ image, title, caption }) => {
+  if (!image) return null;
 
   return (
-    <figure className="my-10 sm:my-12">
-      <div className="group relative overflow-hidden rounded-xl bg-zinc-100 shadow-sm">
+    <div className="w-full">
+      <div className="w-full bg-[#f9f9f9]">
         <img
           src={image}
           alt={title || "Blog cover"}
-          className="h-auto max-h-[470px] min-h-[280px] w-full object-cover transition-transform duration-600 ease-out group-hover:scale-[1.015] sm:min-h-[400px]"
+          className="mx-auto h-auto max-h-[600px] w-full object-contain"
+          loading="eager"
         />
       </div>
-    </figure>
+      {caption && (
+        <figcaption className="mt-3 text-center text-xs tracking-tight text-[#6b6b6b]">
+          {caption}
+        </figcaption>
+      )}
+    </div>
   );
 };
 

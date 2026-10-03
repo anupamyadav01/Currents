@@ -20,7 +20,16 @@ const blogsSlice = createSlice({
     },
 
     // Blog actions
-    likeBlog: (state, action) => {},
+    likeBlog: (state, action) => {
+      const updatedBlog = action.payload.blog || action.payload;
+      const blog = state.blogs.find((b) => b._id === updatedBlog._id);
+
+      if (blog) {
+        // Only update what changed — leaves everything else intact
+        blog.like = updatedBlog.like;
+        blog.updatedAt = updatedBlog.updatedAt;
+      }
+    },
 
     commentBlog: (state, action) => {},
 
