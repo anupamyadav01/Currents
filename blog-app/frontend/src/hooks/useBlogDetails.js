@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { likeBlog, removeBlog } from "../features/blog/blogSlice";
+import { removeBlog } from "../features/blog/blogSlice";
 
 const useBlogDetails = (blogId) => {
   const [blog, setBlog] = useState(null);
@@ -67,20 +67,6 @@ const useBlogDetails = (blogId) => {
     navigate(`/update-blog/${blogId}`);
   };
 
-  const like = async () => {
-    try {
-      console.log("Handle link called...");
-      const response = await api.post(`/v1/blogs/like/${blogId}`);
-      dispatch(likeBlog(response.data));
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const handleComment = () => {
-    console.log("Handle comment called...");
-  };
-
   const handleBookmark = () => {
     console.log("Handle bookmark called...");
   };
@@ -117,10 +103,8 @@ const useBlogDetails = (blogId) => {
     toggleMenu,
     closeMenu,
     handleCopyLink,
-    like,
     handleBookmark,
     handleEditBlog,
-    handleComment,
   };
 };
 

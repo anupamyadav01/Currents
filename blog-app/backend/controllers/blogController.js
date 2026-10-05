@@ -48,11 +48,18 @@ const getBlogById = async (req, res) => {
         select: "blogId title description image createdAt",
       },
     });
+    // .populate({
+    //   path: "comment",
+    //   populate: {
+    //     path: "user",
+    //     select: "name email",
+    //   },
+    // });
 
     if (!requestedBlog) {
       return res.status(404).json({
         success: false,
-        message: "Blog not found",
+        message: "Blog not found(get blog by id)",
       });
     }
 
@@ -74,7 +81,7 @@ const getBlogById = async (req, res) => {
 const createBlog = async (req, res) => {
   const creator = req.user;
   const image = req.file;
-  console.log("from create blog", creator);
+  // console.log("from create blog", creator);
 
   const { title, description, content, draft } = req.body;
   if (!title) {
@@ -229,7 +236,7 @@ const likeBlog = async (req, res) => {
     if (!blog) {
       return res.status(404).json({
         success: false,
-        message: "Blog not found",
+        message: "Blog not found(like blog)",
       });
     }
 
@@ -282,7 +289,7 @@ const deleteBlog = async (req, res) => {
     } else {
       return res.status(404).json({
         success: false,
-        message: "Blog not found",
+        message: "Blog not found(delete blog)",
       });
     }
     // await duploadImage.eleteImageFromCloudinary(blog.imageId);

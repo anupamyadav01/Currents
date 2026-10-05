@@ -9,10 +9,14 @@ import BlogContent from "../components/BlogDetails/BlogContent";
 import BlogFooter from "../components/BlogDetails/BlogFooter";
 import BlogCoverImage from "../components/BlogDetails/BlogCoverImage";
 import { getAuthorData, getBlogContentData } from "../utils/blogUtils";
+import CommentBox from "../components/BlogDetails/CommentBox";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
+import { useDispatch } from "react-redux";
+import { setComments } from "../features/comment/commentSlice";
 
 const BlogDetails = () => {
   const { blogId } = useParams();
-
   const {
     blog,
     loading,
@@ -23,6 +27,29 @@ const BlogDetails = () => {
     toggleMenu,
     closeMenu,
   } = useBlogDetails(blogId);
+  const dispatch = useDispatch();
+  const [showCommentBox, setShowCommentBox] = useState(false);
+  const toggleCommentBox = () => {
+    setShowCommentBox((p) => !p);
+  };
+  // get all comments of this blog
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await api.get(`/v1/comments/${blogId}`);
+        // console.log(response);
+
+        dispatch(
+          setComments({
+            comments: response?.data?.comments,
+          }),
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchComments();
+  }, [blogId, dispatch]);
 
   if (loading) {
     return <BlogDetailsSkeleton />;
@@ -36,9 +63,12 @@ const BlogDetails = () => {
   const { authorName, authorAvatar, authorInitial } = getAuthorData(blog);
 
   return (
-    <main className="min-h-screen bg-white text-[#242424] antialiased">
+    <main
+      className={`${showCommentBox ? "h-full w-full bg-white/40" : "min-h-screen border bg-white text-[#242424] antialiased"} `}
+    >
+      {showCommentBox ? <CommentBox toggleCommentBox={toggleCommentBox} /> : ""}
       {/* Top Navigation */}
-      <nav className="mx-auto w-full max-w-[680px] px-5 pt-8 sm:pt-12">
+      <nav className="mx-auto w-full max-w-[680px] px-5 pt-4 sm:pt-8">
         <Link
           to="/"
           className="group inline-flex items-center gap-1.5 text-sm text-[#6b6b6b] transition-colors hover:text-[#242424]"
@@ -64,6 +94,8 @@ const BlogDetails = () => {
 
           <div className="mt-8 border-y border-[#f2f2f2] py-2.5">
             <BlogActions
+              blog={blog}
+              toggleCommentBox={toggleCommentBox}
               copied={copied}
               isMenuOpen={isMenuOpen}
               onCopyLink={handleCopyLink}

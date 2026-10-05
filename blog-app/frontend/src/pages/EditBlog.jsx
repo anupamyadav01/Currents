@@ -29,7 +29,7 @@ const EditBlog = () => {
         const blog = response?.data?.requestedBlog;
 
         if (!blog) {
-          throw new Error("Blog not found");
+          throw new Error("Blog not found(fontend editblog");
         }
 
         setUserData({

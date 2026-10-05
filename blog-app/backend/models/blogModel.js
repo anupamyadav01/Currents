@@ -43,12 +43,12 @@ const blogSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    comment: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Comment",
-      },
-    ],
+    // comment: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Comment",
+    //   },
+    // ],
   },
   {
     timestamps: true,

@@ -1,151 +1,155 @@
 import {
   BadgeCheck,
   BookmarkPlus,
-  Hand,
   MessageCircle,
   MoreHorizontal,
   Repeat2,
-  Star,
-  ThumbsDown,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Like from "../other/LikeIcon";
 
 const BlogCard = ({ post }) => {
-  console.log(post);
+  function handleActionClick(e, callback) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (callback) callback();
+  }
 
   return (
-    <Link to={`/blog-details/${post?.blogId}`}>
-      <article className="group relative my-3 cursor-pointer rounded-2xl border border-zinc-200 bg-white p-4 transition-all duration-150 ease-out hover:-translate-y-1 hover:border-zinc-900 hover:shadow-[0_4px_0_0_#18181b] active:translate-y-0 active:shadow-none sm:p-7">
-        <div className="flex items-start justify-between gap-6 sm:gap-8">
+    <Link to={`/blog-details/${post?.blogId}`} className="group relative block">
+      <article className="relative overflow-hidden rounded-2xl border border-transparent p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-neutral-300/80 hover:bg-amber-50/30 hover:shadow-[0_16px_32px_-12px_rgba(0,0,0,0.08)] active:translate-y-0 active:shadow-xs sm:p-5">
+        <span className="pointer-events-none absolute inset-y-2 left-0 w-1 scale-y-0 rounded-r-full bg-gradient-to-b from-amber-400 to-orange-500 transition-transform duration-300 group-hover:scale-y-100" />
+
+        <div className="flex items-start justify-between gap-5 sm:gap-7">
           <div className="min-w-0 flex-1">
-            {/* AUTHOR */}
-            <div className="mb-3.5 flex items-center gap-2 text-xs text-zinc-600 sm:text-sm">
+            <div className="mb-2.5 flex flex-wrap items-center gap-2 text-xs text-neutral-600 sm:text-[13px]">
               {/* Avatar */}
               {post?.creator?.avatar ? (
                 <img
                   src={post.creator.avatar}
                   alt={post?.creator?.name || "Author"}
-                  className="h-8 w-8 rounded-full border border-zinc-200 object-cover"
+                  className="h-6 w-6 rounded-full object-cover ring-1 ring-neutral-200 transition-transform duration-200 group-hover:ring-neutral-400"
                 />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-xs font-bold text-white">
-                  {post?.creator?.name?.[0] || "A"}
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900 text-[11px] font-bold text-white transition-colors duration-200 group-hover:bg-amber-500">
+                  {post?.creator?.name?.[0]?.toUpperCase() || "A"}
                 </div>
               )}
 
               {/* Author name */}
-              <span className="font-semibold text-zinc-900">
-                {post?.creator?.name || "Anonymous"}
+              <span className="font-semibold text-neutral-900 transition-colors group-hover:text-black">
+                {post?.creator?.name || "Anonymous Scribe"}
               </span>
 
-              {/* Verified */}
+              {/* Verified Badge */}
               <BadgeCheck
-                size={16}
+                size={14}
                 strokeWidth={2.5}
                 className="fill-blue-500 text-white"
               />
 
-              <span className="text-zinc-300">·</span>
+              <span className="text-neutral-300">·</span>
 
               {/* Date */}
-              <span className="text-zinc-400">
+              <span className="text-neutral-500">
                 {post?.createdAt
                   ? new Date(post.createdAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                     })
-                  : "May 8"}
+                  : "Recently"}
               </span>
             </div>
 
-            {/* ================= BLOG CONTENT ================= */}
+            {/* BLOG TEXT */}
             <div>
-              {/* Title */}
-              <h2 className="line-clamp-2 text-xl font-bold tracking-tight text-zinc-900 sm:text-2xl">
-                {post?.title || "Untitled"}
+              <h2 className="relative inline-block font-serif text-lg font-bold tracking-tight text-neutral-950 transition-colors duration-200 group-hover:text-amber-950 sm:text-lg md:text-xl">
+                {post?.title || "Untitled Thought"}
               </h2>
 
-              {/* Description */}
-              <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-zinc-600 sm:text-base">
-                {post?.description || "No description available."}
+              <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-600 transition-colors duration-200 group-hover:text-neutral-700 sm:text-[15px]">
+                {post?.description ||
+                  "No excerpt provided. A mystery worth clicking."}
               </p>
             </div>
 
-            {/* ================= BOTTOM ACTIONS ================= */}
-            <div className="mt-6 flex items-center justify-between border-t border-zinc-100 pt-4">
-              {/* LEFT ACTIONS */}
-              <div className="flex items-center gap-4 text-xs font-medium text-zinc-500">
-                {/* Star */}
+            <div className="mt-4 flex items-center justify-between pt-1 text-xs text-neutral-500">
+              {/* Left Action Counters */}
+              <div className="flex items-center gap-4 sm:gap-5">
+                {/* Claps */}
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 transition-colors hover:text-amber-500"
+                  onClick={(e) => handleActionClick(e)}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-md py-1 transition-all duration-150 hover:scale-105 hover:text-amber-700"
+                  title="Clap"
                 >
-                  <Star size={16} strokeWidth={2} />
-                  <span>{post?.likesCount ?? post?.likes?.length ?? 0}</span>
-                </button>
-
-                {/* Clap */}
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 transition-colors hover:text-zinc-900"
-                >
-                  <Hand size={16} strokeWidth={2} />
-                  <span>{post?.clapsCount ?? 0}</span>
+                  <Like size={18} />
+                  <span className="font-medium">{post?.like.length}</span>
                 </button>
 
                 {/* Comments */}
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 transition-colors hover:text-zinc-900"
+                  onClick={(e) => handleActionClick(e)}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-md py-1 transition-all duration-150 hover:scale-105 hover:text-amber-700"
+                  title="Responses"
                 >
-                  <MessageCircle size={16} strokeWidth={2} />
-                  <span>{post?.commentsCount ?? 0}</span>
+                  <MessageCircle
+                    size={18}
+                    strokeWidth={1.8}
+                    className="text-black transition-colors group-hover:text-neutral-700"
+                  />
+                  <span className="font-medium">
+                    {post?.commentsCount ?? 0}
+                  </span>
                 </button>
 
                 {/* Repost */}
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 transition-colors hover:text-zinc-900"
+                  onClick={(e) => handleActionClick(e)}
+                  className="hidden cursor-pointer items-center gap-1.5 rounded-md py-1 transition-all duration-150 hover:scale-105 hover:text-amber-700 sm:flex"
+                  title="Reshare"
                 >
-                  <Repeat2 size={17} strokeWidth={2} />
-                  <span>{post?.repostsCount ?? 0}</span>
+                  <Repeat2
+                    size={21}
+                    strokeWidth={1.8}
+                    className="text-black transition-colors group-hover:text-neutral-700"
+                  />
+                  <span className="font-medium">{post?.repostsCount ?? 0}</span>
                 </button>
               </div>
 
-              {/* RIGHT ACTIONS */}
-              <div className="flex items-center gap-3 text-zinc-400">
+              {/* Right Utility Buttons */}
+              <div className="flex items-center gap-2 text-neutral-400 sm:gap-3">
                 <button
                   type="button"
-                  className="transition-colors hover:text-zinc-900"
+                  onClick={(e) => handleActionClick(e)}
+                  className="cursor-pointer p-1 transition-all duration-150 hover:scale-110 hover:text-neutral-900"
+                  title="Bookmark"
                 >
-                  <ThumbsDown size={17} strokeWidth={2} />
+                  <BookmarkPlus size={18} strokeWidth={1.8} />
                 </button>
 
                 <button
                   type="button"
-                  className="transition-colors hover:text-zinc-900"
+                  onClick={(e) => handleActionClick(e)}
+                  className="cursor-pointer p-1 transition-all duration-150 hover:scale-110 hover:text-neutral-900"
+                  title="More options"
                 >
-                  <BookmarkPlus size={17} strokeWidth={2} />
-                </button>
-
-                <button
-                  type="button"
-                  className="transition-colors hover:text-zinc-900"
-                >
-                  <MoreHorizontal size={18} strokeWidth={2.2} />
+                  <MoreHorizontal size={18} strokeWidth={2} />
                 </button>
               </div>
             </div>
           </div>
 
-          {/* ================= BLOG IMAGE ================= */}
           {post?.image && (
-            <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 sm:w-44">
+            <div className="relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-xl border border-neutral-200/80 bg-neutral-100 shadow-2xs transition-all duration-300 group-hover:border-neutral-300 group-hover:shadow-md sm:w-36 md:w-44">
               <img
                 src={post.image}
-                alt={post?.title || "Blog thumbnail"}
+                alt={post?.title || "Story thumbnail"}
                 loading="lazy"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-108"
               />
             </div>
           )}

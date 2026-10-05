@@ -9,36 +9,36 @@ const blogsSlice = createSlice({
   initialState,
 
   reducers: {
-    // Set / replace all blogs
     setBlogs: (state, action) => {
       state.blogs = action.payload;
     },
 
-    // Remove one blog
     removeBlog: (state, action) => {
       state.blogs = state.blogs.filter((blog) => blog._id !== action.payload);
     },
 
-    // Blog actions
     likeBlog: (state, action) => {
-      const updatedBlog = action.payload.blog || action.payload;
-      const blog = state.blogs.find((b) => b._id === updatedBlog._id);
-
+      const { blogId, userId } = action.payload;
+      const blog = state.blogs.find((b) => b.blogId === blogId);
       if (blog) {
-        // Only update what changed — leaves everything else intact
-        blog.like = updatedBlog.like;
-        blog.updatedAt = updatedBlog.updatedAt;
+        const isLiked = blog.like.includes(userId);
+
+        if (isLiked) {
+          blog.like = blog.like.filter((id) => id !== userId);
+        } else {
+          blog.like.push(userId);
+        }
       }
     },
 
-    commentBlog: (state, action) => {},
+    // commentBlog: (state, action) => {},
 
     // Comment actions
-    deleteComment: (state, action) => {},
+    // deleteComment: (state, action) => {},
 
-    editComment: (state, action) => {},
+    // editComment: (state, action) => {},
 
-    likeComment: (state, action) => {},
+    // likeComment: (state, action) => {},
   },
 });
 

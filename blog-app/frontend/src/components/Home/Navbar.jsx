@@ -1,21 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../features/auth/authSlice";
-import api from "../../api/axios"; // Central axios instance with withCredentials: true
+import api from "../../api/axios";
 import ProfileDropdown from "./ProfileDropdown";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const dropdownRef = useRef(null);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [showProfile, setShowProfile] = useState(false);
-
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowProfile(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Subtle border shadow on scroll
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 10);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -30,7 +44,12 @@ const Navbar = () => {
     navigate("/create-blog");
   };
 
-  // Logout Logic
+  const handleSearchSubmit = (e) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await api.post("/auth/logout");
@@ -41,136 +60,196 @@ const Navbar = () => {
       );
     } finally {
       dispatch(logout());
+      setShowProfile(false);
       navigate("/login");
     }
   };
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 flex justify-center transition-all duration-500 ${
-        isScrolled ? "px-4 pt-3" : "px-6 pt-5"
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled
+          ? "border-b border-neutral-200/90 bg-white/95 shadow-[0_1px_3px_rgba(0,0,0,0.03)] backdrop-blur-md"
+          : "border-b border-neutral-200/60 bg-white"
       }`}
     >
-      <nav
-        className={`relative flex w-full items-center justify-between transition-all duration-300 ${
-          isScrolled ? "max-w-5xl px-5 py-2.5" : "max-w-6xl px-6 py-3.5"
-        } rounded-[16px] border border-white/[0.12] bg-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-[7.5px]`}
-      >
-        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-
-        {/* LOGO */}
-        <div
-          onClick={() => navigate("/")}
-          className="group flex cursor-pointer items-center gap-3 select-none"
-        >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 text-white shadow-[0_2px_10px_rgba(0,0,0,0.15)] transition-transform duration-300 group-hover:scale-105">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-4.5 w-4.5"
-            >
-              <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
-            </svg>
-          </div>
-          <span className="font-serif text-xl font-bold tracking-tight text-zinc-900">
-            Scribe<span className="text-zinc-400">.</span>
-          </span>
-        </div>
-
-        {/* CENTER NAV LINKS */}
-        <div className="hidden items-center gap-1 rounded-full bg-black/[0.04] p-1 text-xs font-medium tracking-wide text-zinc-700 backdrop-blur-md sm:flex">
-          <button
-            type="button"
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* LEFT: Logo & Medium-style Search */}
+        <div className="flex items-center gap-4 sm:gap-6">
+          {/* Logo */}
+          <div
             onClick={() => navigate("/")}
-            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white/60 hover:text-zinc-950 hover:shadow-xs"
+            className="group flex cursor-pointer items-center gap-2 select-none"
           >
-            Stories
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white/60 hover:text-zinc-950 hover:shadow-xs"
-          >
-            Featured
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-full px-4 py-1.5 transition-all hover:bg-white/60 hover:text-zinc-950 hover:shadow-xs"
-          >
-            Community
-          </button>
+            <span className="text-2.5xl font-serif font-black tracking-tighter text-neutral-900 transition-colors group-hover:text-black">
+              Scribe<span className="font-sans text-emerald-600">.</span>
+            </span>
+          </div>
+
+          {/* Search Bar (Medium style) */}
+          <div className="relative hidden md:block">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <svg
+                className="h-4 w-4 text-neutral-400"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchSubmit}
+              placeholder="Search Scribe"
+              className="h-9 w-44 rounded-full border border-transparent bg-neutral-100/90 pr-4 pl-9 text-[13px] text-neutral-800 placeholder-neutral-500 transition-all duration-300 focus:w-64 focus:border-neutral-300 focus:bg-white focus:ring-0 focus:outline-none"
+            />
+          </div>
         </div>
 
-        {/* RIGHT ACTIONS */}
-        <div className="flex items-center gap-2.5">
-          {/* WRITE BLOG BUTTON */}
+        {/* RIGHT: Actions */}
+        <div className="flex items-center gap-4 sm:gap-6">
+          {/* Write / Draft Story Button */}
           <button
             onClick={handleWriteBlog}
             type="button"
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-white/40 px-3.5 py-1.5 text-xs font-semibold text-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.03)] backdrop-blur-md transition-all duration-200 hover:bg-white/70 active:scale-95"
+            className="group flex cursor-pointer items-center gap-2 text-neutral-600 transition-colors hover:text-neutral-900"
+            title="Write a story"
           >
             <svg
+              className="h-5 w-5 text-neutral-500 transition-transform duration-200 group-hover:scale-105 group-hover:text-neutral-900"
               xmlns="http://www.w3.org/2000/svg"
-              className="h-3.5 w-3.5 text-zinc-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={2}
+              strokeWidth={1.75}
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M12 4v16m8-8H4"
+                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
               />
             </svg>
-            <span className="hidden sm:inline">Write</span>
+            <span className="text-sm font-normal">Write</span>
           </button>
 
-          {/* AUTHENTICATION STATE */}
           {isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              {/* User Avatar Badge */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              {/* Notification Bell */}
               <button
-                onClick={() => setShowProfile((prev) => !prev)}
-                title={user?.email || "User Profile"}
-                className="group relative flex h-9 cursor-pointer items-center gap-2 rounded-full bg-white/35 py-1 pr-3 pl-1.5 shadow-xs backdrop-blur-md transition-colors select-none hover:bg-white/55"
+                type="button"
+                className="relative text-neutral-500 transition-colors hover:text-neutral-900"
+                title="Notifications"
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 text-[11px] font-bold text-white uppercase shadow-xs">
-                  {user?.name?.[0] || "U"}
-                </div>
-                <span className="max-w-[70px] truncate text-xs font-medium text-zinc-800 sm:max-w-[100px]">
-                  {user?.name?.split(" ")[0] || "User"}
-                </span>
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                <svg
+                  className="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.8}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
+                  />
+                </svg>
+                {/* Unread indicator dot */}
+                <span className="absolute top-0 right-0 h-1.5 w-1.5 rounded-full bg-emerald-600 ring-2 ring-white" />
               </button>
+
+              {/* Profile Avatar & Dropdown Trigger */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowProfile((prev) => !prev)}
+                  type="button"
+                  className="flex cursor-pointer items-center gap-1 rounded-full p-0.5 focus:outline-none"
+                  aria-expanded={showProfile}
+                >
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user?.name || "User"}
+                      className="h-8 w-8 rounded-full object-cover ring-1 ring-neutral-200"
+                    />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-xs font-semibold text-white">
+                      {user?.name?.[0]?.toUpperCase() || "U"}
+                    </div>
+                  )}
+
+                  <svg
+                    className={`h-3.5 w-3.5 text-neutral-500 transition-transform duration-200 ${
+                      showProfile ? "rotate-180 text-neutral-900" : ""
+                    }`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu */}
+                {showProfile && (
+                  <div className="animate-in fade-in zoom-in-95 absolute top-full right-0 mt-3 w-56 origin-top-right duration-150">
+                    <ProfileDropdown handleLogout={handleLogout} />
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5">
+            /* Unauthenticated Links */
+            <div className="flex items-center gap-4 sm:gap-6">
               <button
-                onClick={() => navigate("/login")}
                 type="button"
-                className="cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:text-zinc-950"
+                onClick={() => navigate("/our-story")}
+                className="hidden text-sm text-neutral-600 transition-colors hover:text-neutral-900 md:block"
               >
-                Sign In
+                Our story
               </button>
+
               <button
-                onClick={() => navigate("/signup")}
                 type="button"
-                className="cursor-pointer rounded-full bg-zinc-950 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 active:scale-95"
+                onClick={() => navigate("/membership")}
+                className="hidden text-sm text-neutral-600 transition-colors hover:text-neutral-900 lg:block"
               >
-                Get Started
+                Membership
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="text-sm font-normal text-neutral-700 transition-colors hover:text-neutral-950"
+              >
+                Sign in
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/signup")}
+                className="cursor-pointer rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-neutral-800 active:scale-95"
+              >
+                Get started
               </button>
             </div>
           )}
         </div>
-
-        {/* Profile Dropdown */}
-        {showProfile && (
-          <div className="absolute top-full right-0 z-50 mt-2">
-            <ProfileDropdown handleLogout={handleLogout} />
-          </div>
-        )}
-      </nav>
+      </div>
     </header>
   );
 };

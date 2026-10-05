@@ -1,3 +1,4 @@
-how to use promise.all
-how context api works with 2 methods
-when to not use try and catch block
+What I am creating ?
+-> Like functionality
+-> User can see Who all liked this post?
+-> Comment functionality

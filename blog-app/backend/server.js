@@ -6,6 +6,7 @@ const connectDB = require("./config/connectDB.js");
 const userRouter = require("./routes/userRoutes.js");
 const blogRouter = require("./routes/blogRoutes.js");
 const cookieParser = require("cookie-parser");
+const commentRouter = require("./routes/commentRoutes");
 const cloudinary = require("cloudinary").v2;
 const app = express();
 require("dotenv").config();
@@ -22,7 +23,8 @@ app.use(
 );
 
 app.use("/api/v1", userRouter);
-app.use("/api/v1", blogRouter);
+app.use("/api/v1/blogs", blogRouter);
+app.use("/api/v1/comments", commentRouter);
 
 app.listen(PORT, () => {
   console.log(`sErVeR is running on port ${PORT}`);
