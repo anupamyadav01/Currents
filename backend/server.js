@@ -12,12 +12,13 @@ const app = express();
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
+const url = process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: url,
     credentials: true,
   }),
 );
